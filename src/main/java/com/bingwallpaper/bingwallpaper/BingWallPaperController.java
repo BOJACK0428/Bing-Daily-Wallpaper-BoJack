@@ -24,8 +24,14 @@ public class BingWallPaperController {
 	private final RestTemplate restTemplate = new RestTemplate();
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	@GetMapping("/getHistory")
-	private ResponseEntity<byte[]> getHistory() throws Exception {
+	/**
+	 * @return {@link org.springframework.http.ResponseEntity<byte[]>}
+	 * @author JingKe
+	 * @description 获取必应历史五天内的随机壁纸，返回JSON数据
+	 * @date 2025/8/10 20:00
+	 */
+	@GetMapping("/getJson")
+	private BingWallPaperEntity getJson() throws Exception {
 		Random random = new Random();
 		// 生成1到7之间的随机数
 		int randomNumber = random.nextInt(7) + 1;
@@ -39,6 +45,18 @@ public class BingWallPaperController {
 		List<Map<String, Object>> imageList = (List<Map<String, Object>>) bodyMap.get("images");
 		//获取单张图片实体
 		BingWallPaperEntity bingWallPaperEntity = objectMapper.convertValue(imageList.get(0), BingWallPaperEntity.class);
+		return bingWallPaperEntity;
+	}
+
+	/**
+	 * @return {@link org.springframework.http.ResponseEntity<byte[]>}
+	 * @author JingKe
+	 * @description 获取必应历史五天内的随机壁纸，直接返回图片数据
+	 * @date 2025/8/10 20:00
+	 */
+	@GetMapping("/getImg")
+	private ResponseEntity<byte[]> getImg() throws Exception {
+		BingWallPaperEntity bingWallPaperEntity = this.getJson();
 		//下载url对应的数据
 		URL url = new URL(bingUrl + bingWallPaperEntity.getUrl());
 		InputStream inputStream = url.openStream();
@@ -48,8 +66,6 @@ public class BingWallPaperController {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.IMAGE_JPEG);
 		return ResponseEntity.ok().headers(headers).body(imageBytes);
-
 	}
-
 
 }
